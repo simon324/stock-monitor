@@ -20,9 +20,9 @@ type Optimization = {
 };
 
 const regimeColor: Record<Regime, string> = {
-  Bull: "text-emerald-400 bg-emerald-400/10",
-  Bear: "text-red-400 bg-red-400/10",
-  Volatile: "text-amber-400 bg-amber-400/10",
+  Bull: "text-emerald-700 bg-emerald-50 ring-emerald-200",
+  Bear: "text-red-700 bg-red-50 ring-red-200",
+  Volatile: "text-amber-700 bg-amber-50 ring-amber-200",
 };
 
 export default function OptimizePanel({ tickers }: { tickers: string[] }) {
@@ -52,54 +52,60 @@ export default function OptimizePanel({ tickers }: { tickers: string[] }) {
   }
 
   return (
-    <div className="rounded-xl border border-neutral-800 bg-neutral-900/40 p-4">
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="font-semibold">Markov optimizer</h3>
+    <div className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-sm font-semibold tracking-tight text-neutral-900">
+          Markov optimizer
+        </h3>
         <button
           onClick={run}
           disabled={loading || tickers.length < 2}
-          className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium hover:bg-blue-500 disabled:opacity-40"
+          className="rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-neutral-700 disabled:opacity-40"
         >
           {loading ? "Running…" : "Optimize"}
         </button>
       </div>
 
       {tickers.length < 2 && (
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-neutral-400">
           Add at least 2 tickers to build a portfolio.
         </p>
       )}
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-red-500">{error}</p>}
 
       {markov && opt && (
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-neutral-400">Current regime</span>
+            <span className="text-xs text-neutral-500">Current regime</span>
             <span
-              className={`rounded px-2 py-0.5 text-sm font-semibold ${regimeColor[markov.current]}`}
+              className={`rounded-md px-2 py-0.5 text-xs font-semibold ring-1 ${regimeColor[markov.current]}`}
             >
               {markov.current}
             </span>
-            <span className="ml-auto text-xs text-neutral-500">
-              vol {markov.recentVol.toFixed(0)}% · obj {opt.objective}
+            <span className="ml-auto text-[11px] text-neutral-400">
+              vol {(markov.recentVol * 100).toFixed(0)}% · {opt.objective}
             </span>
           </div>
 
           <div>
-            <p className="mb-1 text-xs text-neutral-400">Target weights</p>
-            <div className="space-y-1.5">
+            <p className="mb-2 text-xs font-medium text-neutral-500">
+              Target weights
+            </p>
+            <div className="space-y-2">
               {[...opt.weights]
                 .sort((a, b) => b.weight - a.weight)
                 .map((w) => (
-                  <div key={w.symbol} className="flex items-center gap-2 text-sm">
-                    <span className="w-16 font-mono">{w.symbol}</span>
-                    <div className="h-2 flex-1 overflow-hidden rounded bg-neutral-800">
+                  <div key={w.symbol} className="flex items-center gap-2.5 text-xs">
+                    <span className="w-14 font-mono font-medium text-neutral-600">
+                      {w.symbol}
+                    </span>
+                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-neutral-100">
                       <div
-                        className="h-full bg-blue-500"
+                        className="h-full rounded-full bg-neutral-900"
                         style={{ width: `${(w.weight * 100).toFixed(1)}%` }}
                       />
                     </div>
-                    <span className="w-12 text-right tabular-nums text-neutral-300">
+                    <span className="w-10 text-right tabular-nums font-medium text-neutral-700">
                       {(w.weight * 100).toFixed(1)}%
                     </span>
                   </div>
@@ -113,28 +119,30 @@ export default function OptimizePanel({ tickers }: { tickers: string[] }) {
             <Stat label="Sharpe" value={opt.sharpe.toFixed(2)} />
           </div>
 
-          <details className="text-xs text-neutral-400">
-            <summary className="cursor-pointer select-none">
+          <details className="text-xs text-neutral-500">
+            <summary className="cursor-pointer select-none font-medium text-neutral-600 hover:text-neutral-900">
               Transition matrix
             </summary>
             <table className="mt-2 w-full border-collapse text-center">
               <thead>
-                <tr className="text-neutral-500">
-                  <th className="p-1 text-left">from \ to</th>
+                <tr className="text-neutral-400">
+                  <th className="p-1 text-left font-normal">from \ to</th>
                   {REGIMES.map((r) => (
-                    <th key={r} className="p-1">{r}</th>
+                    <th key={r} className="p-1 font-normal">{r}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {REGIMES.map((from) => (
                   <tr key={from}>
-                    <td className="p-1 text-left text-neutral-400">{from}</td>
+                    <td className="p-1 text-left text-neutral-500">{from}</td>
                     {REGIMES.map((to) => (
                       <td
                         key={to}
                         className={
-                          from === markov.current ? "p-1 text-neutral-200" : "p-1"
+                          from === markov.current
+                            ? "p-1 font-medium text-neutral-900"
+                            : "p-1 text-neutral-500"
                         }
                       >
                         {(markov.transition[from][to] * 100).toFixed(0)}%
@@ -153,9 +161,11 @@ export default function OptimizePanel({ tickers }: { tickers: string[] }) {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-neutral-800/50 p-2">
-      <div className="text-sm font-semibold tabular-nums">{value}</div>
-      <div className="text-[10px] uppercase tracking-wide text-neutral-500">
+    <div className="rounded-lg border border-neutral-100 bg-neutral-50 p-2.5">
+      <div className="text-sm font-semibold tabular-nums text-neutral-900">
+        {value}
+      </div>
+      <div className="mt-0.5 text-[10px] uppercase tracking-wide text-neutral-400">
         {label}
       </div>
     </div>

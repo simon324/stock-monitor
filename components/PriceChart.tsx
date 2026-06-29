@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import {
   Area,
   AreaChart,
+  CartesianGrid,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -41,29 +42,30 @@ export default function PriceChart({ symbol }: { symbol: string | null }) {
 
   if (!symbol) {
     return (
-      <div className="flex h-72 items-center justify-center text-sm text-neutral-500">
+      <div className="flex h-72 items-center justify-center text-sm text-neutral-400">
         Select a ticker to see its chart.
       </div>
     );
   }
 
-  const up =
-    data.length > 1 && data[data.length - 1].close >= data[0].close;
-  const color = up ? "#34d399" : "#f87171";
+  const up = data.length > 1 && data[data.length - 1].close >= data[0].close;
+  const color = up ? "#059669" : "#dc2626";
 
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">{symbol}</h2>
-        <div className="flex gap-1">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-base font-semibold tracking-tight text-neutral-900">
+          {symbol}
+        </h2>
+        <div className="flex gap-0.5 rounded-lg bg-neutral-100 p-0.5">
           {RANGES.map((r) => (
             <button
               key={r}
               onClick={() => setRange(r)}
-              className={`rounded px-2 py-1 text-xs ${
+              className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
                 r === range
-                  ? "bg-neutral-700 text-white"
-                  : "text-neutral-400 hover:text-white"
+                  ? "bg-white text-neutral-900 shadow-sm"
+                  : "text-neutral-500 hover:text-neutral-800"
               }`}
             >
               {r}
@@ -73,11 +75,11 @@ export default function PriceChart({ symbol }: { symbol: string | null }) {
       </div>
       <div className="h-64">
         {error ? (
-          <div className="flex h-full items-center justify-center text-sm text-red-400">
+          <div className="flex h-full items-center justify-center text-sm text-red-500">
             {error}
           </div>
         ) : loading && data.length === 0 ? (
-          <div className="flex h-full items-center justify-center text-sm text-neutral-500">
+          <div className="flex h-full items-center justify-center text-sm text-neutral-400">
             Loading…
           </div>
         ) : (
@@ -85,29 +87,39 @@ export default function PriceChart({ symbol }: { symbol: string | null }) {
             <AreaChart data={data} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={color} stopOpacity={0.35} />
+                  <stop offset="0%" stopColor={color} stopOpacity={0.18} />
                   <stop offset="100%" stopColor={color} stopOpacity={0} />
                 </linearGradient>
               </defs>
+              <CartesianGrid
+                vertical={false}
+                stroke="#f0f1f3"
+                strokeDasharray="0"
+              />
               <XAxis
                 dataKey="date"
-                tick={{ fontSize: 11, fill: "#888" }}
+                tick={{ fontSize: 11, fill: "#9ca3af" }}
+                tickLine={false}
+                axisLine={false}
                 minTickGap={40}
               />
               <YAxis
                 domain={["auto", "auto"]}
-                tick={{ fontSize: 11, fill: "#888" }}
-                width={55}
+                tick={{ fontSize: 11, fill: "#9ca3af" }}
+                tickLine={false}
+                axisLine={false}
+                width={48}
                 tickFormatter={(v) => Number(v).toFixed(0)}
               />
               <Tooltip
                 contentStyle={{
-                  background: "#15171c",
-                  border: "1px solid #2a2d35",
-                  borderRadius: 8,
+                  background: "#ffffff",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: 10,
                   fontSize: 12,
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
                 }}
-                labelStyle={{ color: "#aaa" }}
+                labelStyle={{ color: "#6b7280" }}
                 formatter={(v) => [Number(v).toFixed(2), "Close"]}
               />
               <Area

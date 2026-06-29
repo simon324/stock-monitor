@@ -89,113 +89,131 @@ export default function Home() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">📈 Stock Monitor</h1>
-        <p className="text-sm text-neutral-400">
-          Live prices · Markov-regime portfolio optimizer · AI stock researcher
-        </p>
+    <div className="flex-1">
+      {/* Top bar */}
+      <header className="border-b border-neutral-200 bg-white/70 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-900 text-sm text-white">
+              ↗
+            </span>
+            <div>
+              <h1 className="text-[15px] font-semibold leading-tight tracking-tight">
+                Stock Monitor
+              </h1>
+              <p className="text-xs text-neutral-500">
+                Live prices · Markov optimizer · AI research
+              </p>
+            </div>
+          </div>
+          <span className="text-xs text-neutral-400">
+            {lastUpdate ? `Updated ${lastUpdate}` : "Loading…"}
+          </span>
+        </div>
       </header>
 
-      {/* Add ticker */}
-      <form onSubmit={addTicker} className="mb-4 flex gap-2">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Add ticker (e.g. TSLA)"
-          className="w-48 rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-2 text-sm outline-none focus:border-neutral-600"
-        />
-        <button
-          type="submit"
-          className="rounded-lg bg-neutral-100 px-3 py-2 text-sm font-medium text-neutral-900 hover:bg-white"
-        >
-          Add
-        </button>
-        <span className="ml-auto self-center text-xs text-neutral-600">
-          {lastUpdate ? `Updated ${lastUpdate}` : "Loading…"}
-        </span>
-      </form>
+      <main className="mx-auto w-full max-w-6xl px-6 py-8">
+        {/* Add ticker */}
+        <form onSubmit={addTicker} className="mb-6 flex gap-2">
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Add ticker — e.g. TSLA"
+            className="w-56 rounded-lg border border-neutral-200 bg-white px-3.5 py-2 text-sm shadow-sm outline-none transition placeholder:text-neutral-400 focus:border-neutral-400 focus:ring-4 focus:ring-neutral-900/5"
+          />
+          <button
+            type="submit"
+            className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-700"
+          >
+            Add
+          </button>
+        </form>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-        <div className="space-y-6">
-          {/* Price tiles */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {tickers.map((t) => {
-              const q = quotes[t];
-              const up = (q?.changePercent ?? 0) >= 0;
-              const dir = flash.current[t];
-              return (
-                <div
-                  key={t}
-                  onClick={() => setSelected(t)}
-                  className={`group cursor-pointer rounded-xl border p-3 transition ${
-                    selected === t
-                      ? "border-neutral-600 bg-neutral-900"
-                      : "border-neutral-800 bg-neutral-900/40 hover:border-neutral-700"
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <span className="font-mono text-sm font-semibold">{t}</span>
+        <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+          <div className="space-y-6">
+            {/* Price tiles */}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {tickers.map((t) => {
+                const q = quotes[t];
+                const up = (q?.changePercent ?? 0) >= 0;
+                const dir = flash.current[t];
+                return (
+                  <div
+                    key={t}
+                    onClick={() => setSelected(t)}
+                    className={`group cursor-pointer rounded-xl border bg-white p-4 shadow-sm transition hover:shadow-md ${
+                      selected === t
+                        ? "border-neutral-900 ring-1 ring-neutral-900"
+                        : "border-neutral-200"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <span className="font-mono text-[13px] font-semibold tracking-tight text-neutral-700">
+                        {t}
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeTicker(t);
+                        }}
+                        className="text-neutral-300 opacity-0 transition group-hover:opacity-100 hover:text-red-500"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <div
+                      className={`mt-2 text-xl font-semibold tabular-nums tracking-tight transition-colors ${
+                        dir === 1
+                          ? "text-emerald-600"
+                          : dir === -1
+                            ? "text-red-600"
+                            : "text-neutral-900"
+                      }`}
+                    >
+                      {q?.price != null ? q.price.toFixed(2) : "—"}
+                    </div>
+                    <div
+                      className={`mt-0.5 text-xs font-medium tabular-nums ${
+                        up ? "text-emerald-600" : "text-red-600"
+                      }`}
+                    >
+                      {q?.changePercent != null
+                        ? `${up ? "▲" : "▼"} ${Math.abs(q.changePercent).toFixed(2)}%`
+                        : ""}
+                    </div>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        removeTicker(t);
+                        setResearch(t);
                       }}
-                      className="text-neutral-600 opacity-0 transition group-hover:opacity-100 hover:text-red-400"
+                      className="mt-3 w-full rounded-lg border border-neutral-200 py-1.5 text-[11px] font-medium text-neutral-600 transition hover:border-neutral-300 hover:bg-neutral-50"
                     >
-                      ✕
+                      Research
                     </button>
                   </div>
-                  <div
-                    className={`mt-1 text-lg font-semibold tabular-nums ${
-                      dir === 1
-                        ? "text-emerald-400"
-                        : dir === -1
-                          ? "text-red-400"
-                          : ""
-                    }`}
-                  >
-                    {q?.price != null ? q.price.toFixed(2) : "—"}
-                  </div>
-                  <div
-                    className={`text-xs tabular-nums ${up ? "text-emerald-400" : "text-red-400"}`}
-                  >
-                    {q?.changePercent != null
-                      ? `${up ? "+" : ""}${q.changePercent.toFixed(2)}%`
-                      : ""}
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setResearch(t);
-                    }}
-                    className="mt-2 w-full rounded bg-neutral-800 py-1 text-[11px] text-neutral-300 hover:bg-neutral-700"
-                  >
-                    Research
-                  </button>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+
+            {/* Chart */}
+            <div className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
+              <PriceChart symbol={selected} />
+            </div>
           </div>
 
-          {/* Chart */}
-          <div className="rounded-xl border border-neutral-800 bg-neutral-900/40 p-4">
-            <PriceChart symbol={selected} />
-          </div>
+          {/* Right rail */}
+          <aside className="space-y-4">
+            <OptimizePanel tickers={tickers} />
+            <p className="rounded-xl border border-neutral-200 bg-white p-4 text-[11px] leading-relaxed text-neutral-500 shadow-sm">
+              Educational tool only — not investment advice. Prices come from free
+              Yahoo Finance data (delayed / unofficial) and may be inaccurate. The
+              optimizer is a simplified model; do your own research.
+            </p>
+          </aside>
         </div>
-
-        {/* Right rail */}
-        <aside className="space-y-4">
-          <OptimizePanel tickers={tickers} />
-          <p className="rounded-lg border border-neutral-800 bg-neutral-900/40 p-3 text-[11px] leading-relaxed text-neutral-500">
-            Educational tool only — not investment advice. Prices come from free
-            Yahoo Finance data (delayed/unofficial) and may be inaccurate. The
-            optimizer is a simplified model; do your own research.
-          </p>
-        </aside>
-      </div>
+      </main>
 
       <ResearchDrawer ticker={research} onClose={() => setResearch(null)} />
-    </main>
+    </div>
   );
 }
