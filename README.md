@@ -1,47 +1,110 @@
 # 📈 Stock Monitor
 
-A personal finance dashboard with three features:
+An open-source finance dashboard: a **live stock watchlist**, a **Markov-regime portfolio
+optimizer**, and a **bring-your-own-key AI stock researcher** — in one clean Next.js app.
 
-1. **Live monitor** — a watchlist of tickers with prices that refresh on an interval.
-2. **Markov-regime optimizer** — detects the current market regime (Bull / Bear / Volatile)
-   with a first-order Markov chain, then runs a Markowitz mean-variance optimization to
-   suggest portfolio weights.
-3. **AI stock researcher** — an LLM (Claude) reads fetched fundamentals + news and writes a
-   structured brief (bull case, bear case, risks, verdict).
+![Stock Monitor dashboard](docs/screenshot.png)
 
 > ⚠️ **Educational tool, not investment advice.** Price data comes from the free, unofficial
 > Yahoo Finance endpoints (via `yahoo-finance2`) and may be delayed or wrong. It does not
 > place trades or connect to a broker.
 
-## Stack
+## How it works
 
-- **Next.js 16** (App Router, TypeScript) + **Tailwind CSS**
-- **yahoo-finance2** — quotes, history, fundamentals, news (no API key required)
-- **recharts** — price chart
-- **OpenRouter** — the AI researcher, bring-your-own-key (any model)
+The screenshot above shows the three features working together:
 
-No database — the watchlist and your OpenRouter key live in the browser's `localStorage`.
+1. **Live monitor (tiles).** Add tickers to a watchlist; each tile shows the latest price and
+   % change, refreshing every ~8 seconds. Click a tile to load its chart; click **Research**
+   to open the AI brief. The watchlist persists in your browser.
+2. **Markov optimizer (right panel).** Click **Optimize** and it (a) detects the current
+   market regime — **Bull / Bear / Volatile** — with a first-order Markov chain on SPY, then
+   (b) runs a Markowitz mean-variance optimization to suggest portfolio **weights**, plus
+   expected return, volatility, and Sharpe. The objective adapts to the regime (max-Sharpe in
+   a bull market, min-variance when it's volatile or bearish).
+3. **AI researcher (drawer).** With an OpenRouter key set (⚙ in the header), **Research**
+   sends the fetched fundamentals + news to the model you chose and renders a structured brief
+   — bull case, bear case, key risks, and a verdict.
 
-## Running locally
+## Quick start (≤ 2 minutes)
 
 ```bash
+git clone https://github.com/simon324/stock-monitor.git
+cd stock-monitor
 npm install
-npm run dev   # http://localhost:3000
+npm run dev          # → http://localhost:3000
 ```
 
-The price monitor and optimizer work with **no keys**. For the AI researcher, click the
-**⚙ Settings** button in the header, paste an [OpenRouter API key](https://openrouter.ai/keys),
-and pick a model (GPT-4o mini, Claude 3.5 Sonnet, Gemini, Llama, or any custom model ID).
-The key is stored only in your browser and sent per-request — nothing is committed.
+The **monitor and optimizer work with no keys.** For AI research, click **⚙ Settings** in the
+header, paste an [OpenRouter API key](https://openrouter.ai/keys), and pick a model (GPT-4o
+mini, Claude 3.5 Sonnet, Gemini, Llama, or any custom model ID). The key is stored only in your
+browser and sent per-request — nothing is committed.
 
-> Prefer a shared server key instead of per-user keys? Set `OPENROUTER_API_KEY` in
-> `.env.local` (see `.env.example`); it's used as a fallback when a request has no key.
+> Prefer one shared key over per-user keys? Set `OPENROUTER_API_KEY` in `.env.local` (see
+> `.env.example`); it's used as a fallback when a request has no key of its own.
 
-## How the Markov optimizer works
+## Editing the project
+
+Everything is small, typed, and dependency-light. Here's the whole map:
+
+| File | What it does |
+| --- | --- |
+| [`app/page.tsx`](app/page.tsx) | Main dashboard — watchlist state, price polling, layout, settings |
+| [`components/PriceChart.tsx`](components/PriceChart.tsx) | Recharts area chart; fetches `/api/history` |
+| [`components/OptimizePanel.tsx`](components/OptimizePanel.tsx) | Calls `/api/optimize`; renders regime + weights |
+| [`components/ResearchDrawer.tsx`](components/ResearchDrawer.tsx) | Side drawer; calls `/api/research` |
+| [`components/SettingsPanel.tsx`](components/SettingsPanel.tsx) | OpenRouter key + model picker (localStorage) |
+| [`lib/finance.ts`](lib/finance.ts) | `yahoo-finance2` wrappers (quotes, history, fundamentals, news) |
+| [`lib/markov.ts`](lib/markov.ts) | Regime states + empirical transition matrix |
+| [`lib/optimize.ts`](lib/optimize.ts) | Monte Carlo Markowitz optimizer (regime-conditioned) |
+| `app/api/*/route.ts` | Server route handlers for quote / history / optimize / research |
+
+### Common changes (one-liners)
+
+| Want to… | Edit |
+| --- | --- |
+| Change the default watchlist | `DEFAULT_WATCHLIST` in [`app/page.tsx`](app/page.tsx) |
+| Change the refresh interval | `POLL_MS` in [`app/page.tsx`](app/page.tsx) |
+| Add/remove model presets | `MODEL_PRESETS` in [`components/SettingsPanel.tsx`](components/SettingsPanel.tsx) |
+| Change the default AI model | `DEFAULT_MODEL` in [`app/api/research/route.ts`](app/api/research/route.ts) |
+| Tune the max weight per stock | `cap` (0.35) in [`lib/optimize.ts`](lib/optimize.ts) |
+| Tune optimizer accuracy/speed | `SAMPLES` (30000) in [`lib/optimize.ts`](lib/optimize.ts) |
+| Change regime rules / thresholds | `window` (20) and the `0.75` percentile in [`lib/markov.ts`](lib/markov.ts) |
+| Change the market proxy | `PROXY` (`"SPY"`) in [`app/api/optimize/route.ts`](app/api/optimize/route.ts) |
+| Restyle the theme | [`app/globals.css`](app/globals.css) + Tailwind classes in the components |
+
+### Onboard an AI assistant in one paste
+
+Drop this into Claude Code / Cursor / any coding agent to get it up to speed instantly:
+
+```text
+You are working on "Stock Monitor", a Next.js 16 (App Router, TypeScript) + Tailwind app.
+Three features: (1) a live stock watchlist, (2) a Markov-regime + Markowitz portfolio
+optimizer, (3) an AI stock researcher via OpenRouter (bring-your-own-key).
+
+File map:
+- app/page.tsx ................. main client dashboard: watchlist, polling, layout, settings
+- components/PriceChart.tsx ..... recharts area chart, fetches /api/history
+- components/OptimizePanel.tsx .. calls /api/optimize, renders regime + weights
+- components/ResearchDrawer.tsx . side drawer, calls /api/research
+- components/SettingsPanel.tsx .. OpenRouter key + model picker (localStorage)
+- lib/finance.ts ............... yahoo-finance2 wrappers (quotes, history, fundamentals, news)
+- lib/markov.ts ................ rule-based regime states + empirical transition matrix
+- lib/optimize.ts ............... Monte Carlo Markowitz optimizer (regime-conditioned)
+- app/api/{quote,history,optimize,research}/route.ts .. server route handlers (runtime=nodejs)
+
+Data: yahoo-finance2 (no key needed). AI: OpenRouter, key passed per-request from the browser.
+No database; the watchlist and the API key live in localStorage. Theme is a light fintech
+look (neutral grays; emerald = up, red = down).
+
+When I ask for a change: identify the file(s), keep the existing style and Tailwind
+conventions, run `npm run build` to type-check, and don't add heavy dependencies.
+```
+
+## How the Markov optimizer works (the math)
 
 Implemented in [`lib/markov.ts`](lib/markov.ts) and [`lib/optimize.ts`](lib/optimize.ts).
 
-1. **Regime detection.** Each day in a market proxy (`SPY`) is labelled using its rolling
+1. **Regime detection.** Each day in the market proxy (`SPY`) is labelled using its rolling
    20-day return and annualized volatility:
    - `Volatile` if volatility is above the 75th percentile of history
    - `Bull` if not volatile and rolling return ≥ 0
@@ -69,13 +132,28 @@ Implemented in [`lib/markov.ts`](lib/markov.ts) and [`lib/optimize.ts`](lib/opti
 | `/api/quote?symbols=AAPL,MSFT` | GET | Latest quotes for the watchlist |
 | `/api/history?symbol=AAPL&range=6mo` | GET | OHLC closes for the chart |
 | `/api/optimize` | POST `{ tickers }` | Regime + optimized weights |
-| `/api/research` | POST `{ ticker }` | AI research brief |
+| `/api/research` | POST `{ ticker, apiKey, model }` | AI research brief via OpenRouter |
+
+## Stack
+
+- **Next.js 16** (App Router, TypeScript) + **Tailwind CSS**
+- **yahoo-finance2** — quotes, history, fundamentals, news (no API key required)
+- **recharts** — price chart
+- **OpenRouter** — the AI researcher, bring-your-own-key (any model)
+
+No database — the watchlist and your OpenRouter key live in the browser's `localStorage`.
 
 ## Deploying
 
 Works out of the box on **Vercel**: import the repo and deploy. AI research is
 bring-your-own-key from the in-app Settings, so no environment variables are required
 (optionally set `OPENROUTER_API_KEY` for a shared fallback key). `npm run build` must pass first.
+
+## Growth & ROI
+
+Want this project to actually get used (and earn its keep)? See the
+**[Adoption & ROI playbook →](docs/GROWTH.md)** — positioning, discoverability, where to launch,
+and how to turn an open-source repo into real return.
 
 ## License
 
