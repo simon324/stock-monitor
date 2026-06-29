@@ -149,11 +149,11 @@ Works out of the box on **Vercel**: import the repo and deploy. AI research is
 bring-your-own-key from the in-app Settings, so no environment variables are required
 (optionally set `OPENROUTER_API_KEY` for a shared fallback key). `npm run build` must pass first.
 
-## Growth & ROI
+## Optimizing this repo
 
-Want this project to actually get used (and earn its keep)? See the
-**[Adoption & ROI playbook →](docs/GROWTH.md)** — positioning, discoverability, where to launch,
-and how to turn an open-source repo into real return.
+A concrete, do-this-now checklist for making this repo discoverable and adoption-ready —
+release tagging, deploy button, `good first issue`s, launch copy, and awesome-list submissions,
+all specific to this project: **[docs/GROWTH.md →](docs/GROWTH.md)**.
 
 ## License
 

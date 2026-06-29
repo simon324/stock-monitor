@@ -1,46 +1,31 @@
-# Adoption & ROI Playbook
+# Repo Optimization Guide
 
-How to turn this open-source repo into real return — adoption, contributors, and (optionally)
-sponsorship. The principle throughout: **engineers discover tools; they hate being sold to.**
-Advertise the *problem and the demo*, never the "product."
+A concrete, do-this-now checklist to optimize **this repo** (`simon324/stock-monitor`) for
+discovery and adoption. Not generic theory — every item below is copy-paste ready and specific
+to this project. The principle: developers discover tools and hate being sold to, so lead with
+the **problem + the demo**, never a pitch.
 
-This is adapted for *this* repo's audience — indie hackers, fintech/quant hobbyists, and
-Next.js / TypeScript developers — not enterprise buyers.
-
----
-
-## What "ROI" means here
-
-You're not selling a SaaS. Realistic returns for a project like this:
-
-| Return | How it shows up |
-| --- | --- |
-| **Reputation / portfolio** | A polished, real, working repo you can point employers/clients to |
-| **Contributors** | PRs that add features (websocket prices, more optimizers, broker read-only) |
-| **Users** | Devs who fork it as a starter for their own finance app |
-| **Sponsorship** | GitHub Sponsors, once there's sustained usage and issues |
-| **Lead-in** | A credible artifact that drives traffic to a blog, newsletter, or paid hosted version |
-
-Pick the one you actually want — it changes where you spend effort.
+Track progress with the checkboxes.
 
 ---
 
-## 1. Make the repo legible in 30 seconds
+## 0. Status
 
-Developers decide fast. The README must answer, above the fold:
+- [x] Public + MIT licensed
+- [x] Real screenshot in the README (`docs/screenshot.png`)
+- [x] Description + 13 topics set
+- [ ] `v0.1.0` release tagged
+- [ ] Vercel deploy button in README
+- [ ] `CONTRIBUTING.md`
+- [ ] `good first issue`s seeded
+- [ ] One launch post (Show HN / Reddit)
+- [ ] Submitted to 1–2 awesome-lists
 
-- **What problem does it solve?** ✅ (live prices + a regime-aware optimizer + AI research, free)
-- **Who is it for?** ✅ (indie devs / quant hobbyists / Next.js builders)
-- **How fast can I try it?** ✅ (`git clone … && npm install && npm run dev`)
-- **A real screenshot, not a mockup.** ✅ ([`docs/screenshot.png`](screenshot.png))
-- **When *not* to use it.** ✅ (it's educational, free data, not a production risk system)
+---
 
-That credibility — honest limitations + real output — is what converts skeptical engineers.
+## 1. Repo settings (done — keep current)
 
-## 2. Win GitHub search (most people skip this)
-
-GitHub search is keyword-primitive but predictable. Set a sharp description and topics so the
-phrases people actually type match:
+Description and topics are already set to match what people search for. If you ever reset them:
 
 ```bash
 gh repo edit simon324/stock-monitor \
@@ -51,75 +36,120 @@ gh repo edit simon324/stock-monitor \
   --add-topic ai --add-topic tailwindcss --add-topic dashboard
 ```
 
-Use the exact phrases the audience searches: *"stock dashboard nextjs"*, *"portfolio optimizer
-typescript"*, *"yahoo finance api javascript"*, *"openrouter app example"*.
+Also set the repo's **website** field to the live demo once deployed:
 
-## 3. Drive time-to-value to near zero
+```bash
+gh repo edit simon324/stock-monitor --homepage "https://<your-vercel-url>.vercel.app"
+```
 
-The repo already nails this — **the monitor and optimizer run with no API key**. Keep it that
-way. Never gate the first run behind a signup or key. "I see value before I configure
-anything" is the whole game. A 1-click deploy button is worth adding:
+## 2. Add a one-click deploy button (lowers time-to-value to zero)
+
+Paste under the Quick start in the README:
 
 ```md
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/simon324/stock-monitor)
 ```
 
-## 4. Use issues, releases, and discussions as growth surfaces
+## 3. Cut the first release
 
-- **Seed 3–5 `good first issue`s** (e.g. "add Finnhub websocket for true streaming",
-  "add a min-correlation optimizer", "dark mode toggle"). Each one is a contributor on-ramp.
-- **Tag releases** (`v0.1.0`, …) with short notes: what changed, who it's for. Even tiny
-  releases signal the project is alive — stale repos die fast.
-- **Open a Discussion** like "How would you extend the optimizer?" — people discover repos
-  through threads as much as through stars.
+A tagged release signals the project is alive (stale repos die fast):
 
-## 5. Earn attention *off*-repo (where growth actually happens)
+```bash
+gh release create v0.1.0 --title "v0.1.0 — first public release" --notes "$(cat <<'EOF'
+Open-source finance dashboard:
+- Live stock watchlist (yahoo-finance2, no key needed)
+- Markov-regime detector + Markowitz portfolio optimizer
+- Bring-your-own-key AI stock researcher (OpenRouter, any model)
 
-One good external spike converts far more than grinding for stars. Best fits for this project:
+Educational tool, not investment advice.
+EOF
+)"
+```
 
-| Channel | How to do it without getting roasted |
-| --- | --- |
-| **Show HN** | "Show HN: Open-source stock dashboard with a Markov-regime portfolio optimizer". Link the repo, lead with the demo + the honest "not advice / free data" caveat. |
-| **r/algotrading, r/quant, r/webdev, r/nextjs** | Lead with a learning or the screenshot + code. Link GitHub, never a pricing page. Disclose you built it. |
-| **A technical blog post** | "Building a regime-switching portfolio optimizer in TypeScript" → link the repo. Benchmarks/visuals beat marketing. |
-| **awesome-* lists** | Submit to `awesome-nextjs`, `awesome-quant`, `awesome-react`. Curated lists are durable trust signals. |
-| **A 90-second YouTube/Loom demo** | CLI-to-dashboard walkthrough; pair with the Reddit/HN post for discovery. |
+## 4. Seed contributor on-ramps
 
-Post that works: *"I built an open-source stock dashboard that detects the market regime and
-suggests portfolio weights — no signup, bring your own AI key. Feedback welcome."*
-Post that gets downvoted: *"Check out my finance platform 🚀"*.
+Create these as issues labelled `good first issue` — each one is a ready scope:
 
-## 6. Make it fork- and hack-friendly
+```bash
+gh issue create --title "Add Finnhub websocket for true real-time prices" \
+  --label "good first issue,enhancement" \
+  --body "Today prices are polled every 8s in app/page.tsx (POLL_MS). Add an optional Finnhub websocket client so tiles update on every trade. Fall back to polling when no key is set."
 
-Developers adopt what they can bend. You already have a clean file map and one-line edit table
-in the README. Add a short `CONTRIBUTING.md` (how to run, how to submit a PR) and keep the
-dependency list tiny. Consider an `/examples` folder (e.g. a crypto watchlist variant).
+gh issue create --title "Add a min-correlation / risk-parity optimizer option" \
+  --label "good first issue,enhancement" \
+  --body "lib/optimize.ts only does Monte Carlo Markowitz (max-Sharpe / min-variance). Add a third objective (e.g. risk parity) selectable from the OptimizePanel."
 
-## 7. Sponsorship — only after real usage
+gh issue create --title "Add a 1-click 'Deploy to Vercel' button + screenshot to README" \
+  --label "good first issue,docs" \
+  --body "See docs/GROWTH.md §2. Add the Vercel deploy button under Quick start."
 
-Enable **GitHub Sponsors** once there's sustained traffic and open issues; it signals
-long-term commitment more than it earns money early. Transparency ("sponsorship funds
-maintenance and data costs") beats perks. Don't put upsell banners in the README, don't
-paywall basic features, don't treat users as sales leads — DevOps and indie devs spot it
-instantly and it destroys trust.
+gh issue create --title "Persist the optimizer result and show 'as of' time" \
+  --label "good first issue,enhancement" \
+  --body "OptimizePanel recomputes on each click. Cache the last result in localStorage and show when it was computed."
+```
+
+## 5. Launch assets (copy-paste, problem-first)
+
+### Show HN
+
+> **Title:** Show HN: Open-source stock dashboard with a Markov-regime portfolio optimizer
+>
+> **Body:** I built a small Next.js dashboard that (1) tracks a live stock watchlist, (2)
+> detects the current market regime — bull / bear / volatile — with a first-order Markov chain
+> on SPY and runs a Markowitz optimizer conditioned on that regime, and (3) writes an AI
+> research brief per ticker using your own OpenRouter key. No signup, no key needed for the
+> monitor or optimizer. It's educational — free/unofficial Yahoo data, not investment advice.
+> Code + math write-up in the README. Feedback welcome. <repo link>
+
+### Reddit (lead with the build, link GitHub — never a pricing page)
+
+- **r/algotrading / r/quant** — "I open-sourced a regime-switching portfolio optimizer (Markov
+  + Markowitz) with a live dashboard — would love feedback on the regime model."
+- **r/nextjs / r/webdev** — "Built an open-source finance dashboard in Next.js 16 — live
+  prices, a portfolio optimizer, and a bring-your-own-key AI researcher. No signup."
+- **r/reactjs** — focus on the clean component structure + recharts.
+
+Disclose you built it. One message per post. Link the repo.
+
+### Blog post (drives durable traffic → repo)
+
+Title: *"Building a regime-switching portfolio optimizer in TypeScript"*. Walk through
+`lib/markov.ts` (states + transition matrix) and `lib/optimize.ts` (Monte Carlo Markowitz),
+with the screenshot and a couple of charts. End by linking the repo.
+
+## 6. Get listed (durable trust signals)
+
+Submit a PR adding this repo to:
+
+- `awesome-nextjs` → https://github.com/unicodeveloper/awesome-nextjs
+- `awesome-quant` → https://github.com/wilsonfreitas/awesome-quant
+- `awesome-react` → https://github.com/enaqx/awesome-react
+
+One-line entry, problem-first: *"Stock Monitor — live watchlist + Markov-regime portfolio
+optimizer + BYO-key AI research (Next.js)."*
+
+## 7. Add `CONTRIBUTING.md`
+
+A short file lowers the barrier to PRs:
+
+```md
+# Contributing
+
+1. `npm install` then `npm run dev`.
+2. Make your change; run `npm run build` to type-check.
+3. Keep the existing style (Tailwind utilities, light fintech theme, small deps).
+4. Open a PR describing the change and linking any related issue.
+
+See the README's "Editing the project" section for the file map.
+```
 
 ---
 
-## A lightweight 30-day plan
+## What NOT to do (kills trust)
 
-| Week | Do |
-| --- | --- |
-| **1** | Set description + topics (§2). Add the Vercel deploy button + `CONTRIBUTING.md`. Cut `v0.1.0`. |
-| **2** | Seed 4 `good first issue`s. Write one technical blog post. Record a 90-sec demo. |
-| **3** | Show HN + one well-targeted subreddit post (problem-first). Submit to 2–3 awesome-lists. |
-| **4** | Respond to every issue/PR fast. Cut `v0.2.0` from whatever landed. Open a Discussion. Enable Sponsors if traffic warrants. |
+- Don't gate the first run behind a signup or API key (the monitor/optimizer must stay key-free).
+- Don't add upsell banners or a "Pro" paywall to an open-source repo.
+- Don't buy stars, run display/social ads, or pay for shoutouts — wrong audience, erodes trust.
+- Don't replace honest limitations with marketing language.
 
-## What to avoid (kills trust fast)
-
-- Generic display / Facebook / Instagram ads — wrong audience, erodes credibility.
-- Buying stars or influencer shoutouts.
-- Gating the first run behind signup or an API key.
-- Upsell banners or "Pro" paywalls on basic features in an "open-source" repo.
-- Marketing language where honest limitations should be.
-
-**The golden rule:** advertise the problem, not the product. Trust > reach, every time.
+**Golden rule:** advertise the problem, not the product. Trust > reach, every time.
