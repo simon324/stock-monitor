@@ -34,9 +34,13 @@ const verdictColor: Record<Brief["verdict"], string> = {
 
 export default function ResearchDrawer({
   ticker,
+  apiKey,
+  model,
   onClose,
 }: {
   ticker: string | null;
+  apiKey: string;
+  model: string;
   onClose: () => void;
 }) {
   const [data, setData] = useState<ResearchResponse | null>(null);
@@ -50,7 +54,7 @@ export default function ResearchDrawer({
     fetch("/api/research", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ticker }),
+      body: JSON.stringify({ ticker, apiKey, model }),
     })
       .then((r) => r.json())
       .then((j) => !cancelled && setData(j))

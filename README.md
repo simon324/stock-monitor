@@ -18,20 +18,24 @@ A personal finance dashboard with three features:
 - **Next.js 16** (App Router, TypeScript) + **Tailwind CSS**
 - **yahoo-finance2** — quotes, history, fundamentals, news (no API key required)
 - **recharts** — price chart
-- **@anthropic-ai/sdk** — the AI researcher (optional)
+- **OpenRouter** — the AI researcher, bring-your-own-key (any model)
 
-No database — the watchlist is stored in your browser's `localStorage`.
+No database — the watchlist and your OpenRouter key live in the browser's `localStorage`.
 
 ## Running locally
 
 ```bash
 npm install
-cp .env.example .env.local   # optional: add ANTHROPIC_API_KEY for AI research
-npm run dev                  # http://localhost:3000
+npm run dev   # http://localhost:3000
 ```
 
-The price monitor and optimizer work with **no keys**. The "Research" button needs
-`ANTHROPIC_API_KEY`; without it, it shows a friendly "disabled" message.
+The price monitor and optimizer work with **no keys**. For the AI researcher, click the
+**⚙ Settings** button in the header, paste an [OpenRouter API key](https://openrouter.ai/keys),
+and pick a model (GPT-4o mini, Claude 3.5 Sonnet, Gemini, Llama, or any custom model ID).
+The key is stored only in your browser and sent per-request — nothing is committed.
+
+> Prefer a shared server key instead of per-user keys? Set `OPENROUTER_API_KEY` in
+> `.env.local` (see `.env.example`); it's used as a fallback when a request has no key.
 
 ## How the Markov optimizer works
 
@@ -69,8 +73,9 @@ Implemented in [`lib/markov.ts`](lib/markov.ts) and [`lib/optimize.ts`](lib/opti
 
 ## Deploying
 
-Works out of the box on **Vercel**: import the repo, (optionally) add `ANTHROPIC_API_KEY`
-as an environment variable, and deploy. `npm run build` must pass first.
+Works out of the box on **Vercel**: import the repo and deploy. AI research is
+bring-your-own-key from the in-app Settings, so no environment variables are required
+(optionally set `OPENROUTER_API_KEY` for a shared fallback key). `npm run build` must pass first.
 
 ## Limitations
 

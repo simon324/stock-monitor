@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import PriceChart from "@/components/PriceChart";
 import OptimizePanel from "@/components/OptimizePanel";
 import ResearchDrawer from "@/components/ResearchDrawer";
+import SettingsPanel from "@/components/SettingsPanel";
 
 type Quote = {
   symbol: string;
@@ -25,16 +26,28 @@ export default function Home() {
   const [research, setResearch] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [lastUpdate, setLastUpdate] = useState<string>("");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+  const [model, setModel] = useState("openai/gpt-4o-mini");
   const flash = useRef<Record<string, number>>({});
 
-  // Load / persist watchlist.
+  // Load / persist watchlist + AI settings.
   useEffect(() => {
     const saved =
       typeof window !== "undefined" && localStorage.getItem("watchlist");
     const list = saved ? (JSON.parse(saved) as string[]) : DEFAULT_WATCHLIST;
     setTickers(list);
     setSelected(list[0] ?? null);
+    setApiKey(localStorage.getItem("or_key") ?? "");
+    setModel(localStorage.getItem("or_model") ?? "openai/gpt-4o-mini");
   }, []);
+
+  function saveSettings(key: string, m: string) {
+    setApiKey(key);
+    setModel(m);
+    localStorage.setItem("or_key", key);
+    localStorage.setItem("or_model", m);
+  }
 
   useEffect(() => {
     if (tickers.length > 0)
@@ -106,9 +119,33 @@ export default function Home() {
               </p>
             </div>
           </div>
-          <span className="text-xs text-neutral-400">
-            {lastUpdate ? `Updated ${lastUpdate}` : "Loading…"}
-          </span>
+          <div className="relative flex items-center gap-3">
+            <span className="hidden text-xs text-neutral-400 sm:inline">
+              {lastUpdate ? `Updated ${lastUpdate}` : "Loading…"}
+            </span>
+            <button
+              onClick={() => setSettingsOpen((v) => !v)}
+              title="AI research settings"
+              className={`flex h-9 items-center gap-1.5 rounded-lg border px-3 text-sm transition ${
+                apiKey
+                  ? "border-neutral-200 text-neutral-600 hover:bg-neutral-50"
+                  : "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100"
+              }`}
+            >
+              <span>⚙</span>
+              <span className="hidden sm:inline">
+                {apiKey ? "AI ready" : "Add API key"}
+              </span>
+            </button>
+            {settingsOpen && (
+              <SettingsPanel
+                apiKey={apiKey}
+                model={model}
+                onSave={saveSettings}
+                onClose={() => setSettingsOpen(false)}
+              />
+            )}
+          </div>
         </div>
       </header>
 
@@ -213,7 +250,12 @@ export default function Home() {
         </div>
       </main>
 
-      <ResearchDrawer ticker={research} onClose={() => setResearch(null)} />
+      <ResearchDrawer
+        ticker={research}
+        apiKey={apiKey}
+        model={model}
+        onClose={() => setResearch(null)}
+      />
     </div>
   );
 }
