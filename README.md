@@ -77,6 +77,11 @@ Works out of the box on **Vercel**: import the repo and deploy. AI research is
 bring-your-own-key from the in-app Settings, so no environment variables are required
 (optionally set `OPENROUTER_API_KEY` for a shared fallback key). `npm run build` must pass first.
 
+## License
+
+[MIT](LICENSE) — free to use, modify, and distribute. Contributions welcome.
+Educational software, not financial advice.
+
 ## Limitations
 
 - Free Yahoo Finance data is unofficial and can rate-limit or break without notice.
